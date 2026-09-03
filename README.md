@@ -9,7 +9,7 @@
 
 RiskLedger uses a **3-Way Chronological Split** across 50,000 synthetic transactions:
 1. **Train Set (First 70% = 35,000 txns)**: Trains XGBoost Classifier & Logistic Regression Baseline.
-2. **Validation Set (Middle 10% = 5,000 txns)**: Derives and **LOCKS** global cost-minimizing cutoff ($t^* = 0.13$) and category-specific thresholds ($C(t) = \text{FP} \cdot 50 + \sum \text{FN\_Amount}$).
+2. **Validation Set (Middle 10% = 5,000 txns)**: Derives and **LOCKS** global cost-minimizing cutoff (`t* = 0.13`) and category-specific thresholds (`C(t) = False Positives × ₹50 + Direct Fraud Loss`).
 3. **Held-Out Test Set (Final 20% = 10,000 txns / 319 fraud cases)**: **NEVER USED FOR MODEL TUNING OR THRESHOLD SELECTION**. Evaluated purely out-of-sample for unbiased metrics.
 
 ---
@@ -19,9 +19,9 @@ RiskLedger uses a **3-Way Chronological Split** across 50,000 synthetic transact
 | Parameter / Metric | Baseline (Logistic Regression) | Selected Main Model (XGBoost) |
 |---------------------|-------------------------------|-------------------------------|
 | **Held-Out PR-AUC** | **0.885** | **0.888** (Selected via metric) |
-| **Validation-Locked Cutoff ($t^*$)** | N/A | **0.13** (Locked on Val Set) |
-| **Test Precision @ $t^*$** | N/A | **21.3%** |
-| **Test Recall @ $t^*$** | N/A | **96.6%** (**308 of 319 test fraud cases captured**) |
+| **Validation-Locked Cutoff (t*)** | N/A | **0.13** (Locked on Val Set) |
+| **Test Precision @ t*** | N/A | **21.3%** |
+| **Test Recall @ t*** | N/A | **96.6%** (**308 of 319 test fraud cases captured**) |
 | **Friction Cost (False Positives @ ₹50)** | N/A | ₹56,950 (1,139 false flags) |
 | **Direct Fraud Loss (False Negatives)** | N/A | ₹49,492 (11 missed fraud cases) |
 | **Total Out-of-Sample Financial Loss** | N/A | **₹106,442** |
@@ -51,24 +51,13 @@ RiskLedger uses a **3-Way Chronological Split** across 50,000 synthetic transact
 
 ---
 
-## Demo Video Pitch Structure
-
-1. **Problem (0:00 - 0:45)**: *"A fraud model doesn't tell you where to operate it. Arbitrary 0.5 cutoffs cause massive financial loss."*
-2. **Financial Loss Curve (0:45 - 1:45)**: Show SVG cost curve. *"We choose the threshold (0.13) that minimizes expected loss (FP friction ₹50 + FN direct loss)."*
-3. **SHAP Attributions (1:45 - 2:45)**: Inspect transaction to show additive SHAP values and waterfall progression.
-4. **Category Policies (2:45 - 3:45)**: Demonstrate category-derived cutoffs (`electronics` 0.140 vs `grocery` 0.460).
-5. **Counterfactual Sweep (3:45 - 4:45)**: Move amount slider to demonstrate exact policy boundary crossing.
-6. **Exception Audit & Mandate (4:45 - 5:00)**: Show audit log (11 missed frauds out of 319) and restate defensive mandate.
-
----
-
 ## Execution Commands
 
 ```powershell
-cd C:\Users\dahar\.gemini\antigravity\scratch\payguard-ai
+cd D:\GitHub\payguard-ai
 
 # Start Production Server:
-.\run.ps1
+.\.venv\Scripts\python -m uvicorn backend.server:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 Access the dashboard at **`http://localhost:8000`**.
