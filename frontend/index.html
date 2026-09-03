@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RiskLedger — Adaptive Payment Risk Intelligence</title>
+  <meta name="description" content="RiskLedger is an enterprise payment-risk decision console providing probability scoring, financial loss optimization, risk policies, and SHAP attributions." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- ── APPLICATION SHELL ──────────────────────────────────────────────── -->
+  <div class="app-shell">
+
+    <!-- ── LEFT SIDEBAR NAVIGATION ───────────────────────────────────────── -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <span class="brand-title">RISKLEDGER</span>
+          <span class="brand-tagline">Adaptive Risk Intelligence</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">OVERVIEW</div>
+        <button class="side-nav-btn active" data-tab="overview" onclick="switchNav('overview', this)">
+          Overview
+        </button>
+        <button class="side-nav-btn" data-tab="monitor" onclick="switchNav('monitor', this)">
+          Risk Monitor
+        </button>
+        <button class="side-nav-btn" data-tab="transactions" onclick="switchNav('transactions', this)">
+          Transactions
+        </button>
+        <button class="side-nav-btn" data-tab="policies" onclick="switchNav('policies', this)">
+          Policies
+        </button>
+        <button class="side-nav-btn" data-tab="riskbudget" onclick="switchNav('riskbudget', this)">
+          Risk Budget
+        </button>
+        <button class="side-nav-btn" data-tab="analysis" onclick="switchNav('analysis', this)">
+          Decision Analysis
+        </button>
+
+        <div class="nav-section-label" style="margin-top: 16px;">INTELLIGENCE</div>
+        <button class="side-nav-btn" data-tab="thresholds" onclick="switchNav('thresholds', this)">
+          Threshold Analysis
+        </button>
+        <button class="side-nav-btn" data-tab="audit" onclick="switchNav('audit', this)">
+          Audit Log
+        </button>
+        <button class="side-nav-btn" data-tab="evaluation" onclick="switchNav('evaluation', this)">
+          Model Evaluation
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="env-badge">
+          <span class="env-dot"></span> DEMO / SANDBOX
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── MAIN CONTENT AREA ─────────────────────────────────────────────── -->
+    <div class="content-wrapper">
+
+      <!-- ── TOP BAR ───────────────────────────────────────────────────────── -->
+      <header class="topbar">
+        <div class="breadcrumb">
+          <span class="bc-root">RiskLedger</span>
+          <span class="bc-sep">/</span>
+          <span class="bc-active" id="topbar-breadcrumb">Overview</span>
+        </div>
+
+        <div class="topbar-controls">
+          <input type="text" id="global-search" class="topbar-search" placeholder="Search transactions..." oninput="handleGlobalSearch(this.value)" />
+          <div class="topbar-select-wrap">
+            <select class="topbar-select" id="date-range-select">
+              <option value="30d">Last 30 Days</option>
+              <option value="120d" selected>Full Dataset (120d)</option>
+            </select>
+          </div>
+          <span class="demo-pill">DEMO</span>
+          <div class="topbar-select-wrap">
+            <select class="topbar-select" id="merchant-context-select">
+              <option value="all">All Merchants</option>
+              <option value="merchant_a" selected>Merchant A</option>
+              <option value="merchant_b">Merchant B</option>
+              <option value="merchant_c">Merchant C</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <!-- Subtle Defensive Mandate Strip -->
+      <div class="defense-strip">
+        <span class="strip-tag">DEFENSIVE SYSTEM</span>
+        <span class="strip-text">RiskLedger does not initiate payments or move funds. Risk scoring and policy assessment only.</span>
+      </div>
+
+      <!-- ── BODY VIEWS ───────────────────────────────────────────────────── -->
+      <main class="page-content">
+
+        <!-- ── VIEW 1: OVERVIEW PAGE ───────────────────────────────────────── -->
+        <div id="view-overview" class="view-panel active">
+          <div class="page-header">
+            <h1>Risk Overview</h1>
+            <p>Payment risk, exposure and decision activity across the portfolio.</p>
+          </div>
+
+          <!-- Compact Enterprise KPI Strip with Separators -->
+          <section class="kpi-strip-tight">
+            <div class="kpi-cell">
+              <span class="kpi-label">TRANSACTIONS</span>
+              <span class="kpi-num" id="ov-txns">50,000</span>
+              <span class="kpi-ctx">Total portfolio records</span>
+            </div>
+            <div class="kpi-cell">
+              <span class="kpi-label">HIGH RISK</span>
+              <span class="kpi-num danger" id="ov-high-risk">1,462</span>
+              <span class="kpi-ctx" id="ov-high-pct">2.9% prevalence</span>
+            </div>
+            <div class="kpi-cell">
+              <span class="kpi-label">FRAUD EXPOSURE</span>
+              <span class="kpi-num" id="ov-fraud-exposure">₹49.5L</span>
+              <span class="kpi-ctx">modeled direct loss</span>
+            </div>
+            <div class="kpi-cell">
+              <span class="kpi-label">MODELED LOSS</span>
+              <span class="kpi-num highlight" id="ov-imp-total">₹1.06L</span>
+              <span class="kpi-ctx">at operating threshold</span>
+            </div>
+          </section>
+
+          <!-- Main Analytics Layout (60% / 40% Split) -->
+          <div class="analytics-split">
+            <!-- Left ~60%: Risk Distribution -->
+            <div class="panel-card flex-60">
+              <div class="card-title-row">
+                <h3>Risk Distribution</h3>
+                <span class="meta-label">Portfolio Volume Split</span>
+              </div>
+              
+              <div class="distribution-stacked-bar">
+                <div class="dist-seg low" id="dist-bar-low" style="width: 85%;"></div>
+                <div class="dist-seg med" id="dist-bar-med" style="width: 11%;"></div>
+                <div class="dist-seg high" id="dist-bar-high" style="width: 4%;"></div>
+              </div>
+
+              <table class="dense-table" style="margin-top: 14px;">
+                <thead>
+                  <tr>
+                    <th>Risk Band</th>
+                    <th>Count</th>
+                    <th>Share</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="dot low"></span> LOW</td>
+                    <td class="mono font-bold" id="dist-cnt-low">42,500</td>
+                    <td class="mono">85.0%</td>
+                  </tr>
+                  <tr>
+                    <td><span class="dot med"></span> MEDIUM</td>
+                    <td class="mono font-bold" id="dist-cnt-med">5,500</td>
+                    <td class="mono">11.0%</td>
+                  </tr>
+                  <tr>
+                    <td><span class="dot high"></span> HIGH</td>
+                    <td class="mono font-bold" id="dist-cnt-high">2,000</td>
+                    <td class="mono">4.0%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Right ~40%: Financial Exposure -->
+            <div class="panel-card flex-40">
+              <div class="card-title-row">
+                <h3>Financial Exposure</h3>
+                <span class="meta-label">Modeled Loss Breakdown</span>
+              </div>
+
+              <div class="impact-table" style="margin-top: 10px;">
+                <div class="impact-row">
+                  <span>Expected fraud loss</span>
+                  <span class="mono danger" id="ov-imp-fn">₹49,492</span>
+                </div>
+                <div class="impact-row">
+                  <span>False-positive cost</span>
+                  <span class="mono warning" id="ov-imp-fp">₹56,950</span>
+                </div>
+                <div class="impact-row total">
+                  <span>Total modeled loss</span>
+                  <span class="mono highlight" id="ov-imp-total-sub">₹106,442</span>
+                </div>
+              </div>
+
+              <div class="threshold-callout">
+                <div class="thresh-label">OPERATING THRESHOLD</div>
+                <div class="thresh-value mono">0.130</div>
+                <div class="thresh-caption">Cost-minimizing operating point.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lower Section: Decision Activity centerpiece table -->
+          <div class="panel-card" style="margin-top: 16px;">
+            <div class="card-title-row">
+              <div>
+                <h3>Decision Activity</h3>
+                <p class="panel-sub">Recent transactions requiring attention.</p>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="dense-table">
+                <thead>
+                  <tr>
+                    <th>Transaction</th>
+                    <th>Time</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+                    <th>Risk</th>
+                    <th>Decision</th>
+                  </tr>
+                </thead>
+                <tbody id="overview-activity-tbody">
+                  <tr><td colspan="6" class="text-center p-4">Loading decision activity...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── VIEW 2: RISK MONITOR ────────────────────────────────────────── -->
+        <div id="view-monitor" class="view-panel">
+          <div class="page-header">
+            <h1>Risk Monitor</h1>
+            <p>Review transactions by risk, decision and policy.</p>
+          </div>
+
+          <section class="panel-card">
+            <div class="filter-bar">
+              <div class="filter-controls">
+                <button class="f-btn active" onclick="filterMonitor('ALL', this)">All Decisions</button>
+                <button class="f-btn danger" onclick="filterMonitor('HIGH', this)">HIGH Risk</button>
+                <button class="f-btn warning" onclick="filterMonitor('MEDIUM', this)">MEDIUM Risk</button>
+                <button class="f-btn success" onclick="filterMonitor('LOW', this)">LOW Risk</button>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="dense-table">
+                <thead>
+                  <tr>
+                    <th>Transaction</th>
+                    <th>Timestamp</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+                    <th>Risk</th>
+                    <th>Threshold</th>
+                    <th>Decision</th>
+                    <th>Policy</th>
+                  </tr>
+                </thead>
+                <tbody id="monitor-tbody">
+                  <tr><td colspan="8" class="text-center p-4">Loading risk monitor data...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <!-- ── VIEW 3: TRANSACTIONS ────────────────────────────────────────── -->
+        <div id="view-transactions" class="view-panel">
+          <div class="page-header">
+            <h1>Transactions</h1>
+            <p>Complete portfolio transaction ledger</p>
+          </div>
+
+          <section class="panel-card">
+            <div class="table-container">
+              <table class="dense-table">
+                <thead>
+                  <tr>
+                    <th>Transaction ID</th>
+                    <th>Timestamp</th>
+                    <th>Amount (₹)</th>
+                    <th>Merchant</th>
+                    <th>Category</th>
+                    <th>Risk Score</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="txns-all-tbody">
+                  <tr><td colspan="7" class="text-center p-4">Loading transaction ledger...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <!-- ── VIEW 4: DECISION POLICY ─────────────────────────────────────── -->
+        <div id="view-policies" class="view-panel">
+          <div class="page-header">
+            <h1>Risk Policies</h1>
+            <p>Merchant-specific operating thresholds derived from financial-loss optimization.</p>
+          </div>
+
+          <div class="policies-grid">
+            <div class="panel-card">
+              <h3>GLOBAL POLICY</h3>
+              <p class="panel-sub">Decision mapping boundaries</p>
+
+              <div class="rule-mapping-box">
+                <div class="rule-row success">
+                  <span class="rule-name">Allow below</span>
+                  <span class="mono">&lt; category cutoff</span>
+                </div>
+                <div class="rule-row warning">
+                  <span class="rule-name">Verify between</span>
+                  <span class="mono">category cutoff → 2.5x cutoff</span>
+                </div>
+                <div class="rule-row danger">
+                  <span class="rule-name">Block above</span>
+                  <span class="mono">&gt; 2.5x category cutoff</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-card">
+              <h3>CATEGORY THRESHOLDS</h3>
+              <p class="panel-sub">Optimal category thresholds derived on validation set</p>
+
+              <table class="dense-table">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Operating Threshold</th>
+                    <th>Risk Posture</th>
+                  </tr>
+                </thead>
+                <tbody id="policy-cat-tbody">
+                  <tr><td colspan="3" class="text-center p-4">Loading policy thresholds...</td></tr>
+                </tbody>
+              </table>
+
+              <div class="policy-note">
+                Thresholds are derived from category-level financial-loss optimization and are not manually assigned.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── VIEW 5: RISK BUDGET ─────────────────────────────────────────── -->
+        <div id="view-riskbudget" class="view-panel">
+          <div class="page-header">
+            <h1>Risk Budget</h1>
+            <p>Aggregate automatic-approval exposure for the current merchant.</p>
+          </div>
+
+          <section class="panel-card" style="margin-bottom:16px;">
+            <div class="budget-main">
+              <div class="budget-header-row">
+                <span class="kpi-label">AUTOMATIC APPROVAL EXPOSURE</span>
+                <span class="mono highlight" id="rb-limit-label">₹72,400 of ₹100,000</span>
+              </div>
+
+              <div class="budget-progress-bg">
+                <div class="budget-progress-fill" id="rb-progress-fill" style="width: 72.4%;"></div>
+              </div>
+
+              <div class="budget-sub-row">
+                <span id="rb-util-text">72.4% utilized</span>
+                <span id="rb-rem-text">Remaining capacity: ₹27,600</span>
+              </div>
+            </div>
+          </section>
+
+          <div class="overview-grid">
+            <div class="panel-card">
+              <h3>Exposure Breakdown</h3>
+              <div class="impact-table">
+                <div class="impact-row">
+                  <span>Current exposure</span>
+                  <span class="mono danger" id="rb-cur-exp">₹72,400.00</span>
+                </div>
+                <div class="impact-row">
+                  <span>Remaining capacity</span>
+                  <span class="mono success" id="rb-rem-cap">₹27,600.00</span>
+                </div>
+                <div class="impact-row">
+                  <span>Automatic approvals</span>
+                  <span class="mono" id="rb-txn-cnt">142</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-card">
+              <h3>Policy Control Principle</h3>
+              <p class="panel-sub" style="margin-top:10px;line-height:1.6;" id="rb-policy-expl">
+                The risk budget limits aggregate exposure rather than evaluating transactions only in isolation.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── VIEW 6: DECISION ANALYSIS (WHAT-IF) ─────────────────────────── -->
+        <div id="view-analysis" class="view-panel">
+          <div class="page-header">
+            <h1>Decision Analysis</h1>
+            <p>Explore how transaction attributes affect risk and policy outcome.</p>
+          </div>
+
+          <div class="simulator-layout">
+            <div class="sim-controls-card">
+              <h3>Transaction Parameters</h3>
+              <p class="card-sub">Modify attributes to evaluate model decision boundaries.</p>
+
+              <form onsubmit="return false;">
+                <div class="form-group">
+                  <div class="label-row">
+                    <label>Amount (₹)</label>
+                    <span class="val-badge mono" id="sim-val-amount">₹48,500</span>
+                  </div>
+                  <input type="range" id="sim-amount" min="500" max="100000" step="500" value="48500" oninput="updateSim()" />
+                </div>
+
+                <div class="form-group">
+                  <div class="label-row">
+                    <label>30-Day Customer Baseline (₹)</label>
+                    <span class="val-badge mono" id="sim-val-avg">₹2,500</span>
+                  </div>
+                  <input type="range" id="sim-avg" min="500" max="50000" step="500" value="2500" oninput="updateSim()" />
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="form-group">
+                    <div class="label-row">
+                      <label>Failed Attempts (1h)</label>
+                      <span class="val-badge mono" id="sim-val-failed">2</span>
+                    </div>
+                    <input type="range" id="sim-failed" min="0" max="8" step="1" value="2" oninput="updateSim()" />
+                  </div>
+
+                  <div class="form-group">
+                    <div class="label-row">
+                      <label>Time Window</label>
+                      <span class="val-badge mono" id="sim-val-hour">03:00 UTC</span>
+                    </div>
+                    <input type="range" id="sim-hour" min="0" max="23" step="1" value="3" oninput="updateSim()" />
+                  </div>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="form-group">
+                    <div class="label-row">
+                      <label>Geographic Delta (km)</label>
+                      <span class="val-badge mono" id="sim-val-dist">85 km</span>
+                    </div>
+                    <input type="range" id="sim-dist" min="0" max="300" step="5" value="85" oninput="updateSim()" />
+                  </div>
+
+                  <div class="form-group">
+                    <div class="label-row">
+                      <label>Category</label>
+                      <span class="val-badge mono" id="sim-val-cat">electronics</span>
+                    </div>
+                    <select id="sim-cat" class="select-input" onchange="updateSim()">
+                      <option value="digital_goods">Digital Goods</option>
+                      <option value="electronics" selected>Electronics</option>
+                      <option value="travel">Travel</option>
+                      <option value="fashion">Fashion</option>
+                      <option value="grocery">Grocery</option>
+                      <option value="utilities">Utilities</option>
+                    </select>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div class="sim-results-card">
+              <div class="card-header">
+                <h3>Current Decision</h3>
+                <span id="sim-rec-badge" class="rec-badge block">BLOCK</span>
+              </div>
+
+              <div class="gauge-box">
+                <div class="score-circle" id="sim-score-circle" style="--score-pct: 87.4%;">
+                  <span class="score-number" id="sim-score-num">87.4</span>
+                  <span class="score-denom">%</span>
+                </div>
+                <div class="gauge-meta">
+                  <span class="gauge-label">Risk probability: <strong id="sim-band-text" class="text-danger">87.4%</strong></span>
+                  <span class="gauge-sub" id="sim-prob-text">Policy Threshold: 0.140</span>
+                </div>
+              </div>
+
+              <div class="counterfactual-box">
+                <strong>Decision Boundaries:</strong>
+                <p id="sim-cf-text" style="margin-top:4px;">At ₹27,300 → BLOCK → VERIFY<br/>At ₹11,900 → VERIFY → ALLOW</p>
+              </div>
+
+              <div class="shap-section">
+                <h4>Model Contributions (SHAP)</h4>
+                <div id="sim-shap-bars" class="shap-bars-container"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── VIEW 7: THRESHOLD ANALYSIS ──────────────────────────────────── -->
+        <div id="view-thresholds" class="view-panel">
+          <div class="page-header">
+            <h1>Threshold Analysis</h1>
+            <p>Financial loss across operating thresholds.</p>
+          </div>
+
+          <section class="chart-card">
+            <div class="chart-header">
+              <span>Threshold vs Modeled Financial Loss (C = FP × ₹50 + Direct Fraud Loss)</span>
+              <span class="mono highlight-tick">Selected Operating Threshold: 0.130</span>
+            </div>
+            <div class="svg-chart-container">
+              <svg id="cost-curve-svg" viewBox="0 0 800 220" preserveAspectRatio="none"></svg>
+            </div>
+          </section>
+
+          <div class="optimizer-grid" style="margin-top:16px;">
+            <div class="opt-card">
+              <h3>Operating Cutoff Tuning</h3>
+              <div class="thresh-slider-box">
+                <div class="label-row">
+                  <label>Operating Cutoff</label>
+                  <span class="val-badge mono" id="opt-thresh-val">0.130</span>
+                </div>
+                <input type="range" id="opt-slider" min="0.02" max="0.95" step="0.01" value="0.13" oninput="updateOptimizerCurve(this.value)" />
+              </div>
+
+              <div class="cost-summary-box">
+                <div class="cost-item">
+                  <span>False-positive cost</span>
+                  <span class="cost-value danger" id="opt-cost-fp">₹56,950</span>
+                </div>
+                <div class="cost-item">
+                  <span>False-negative fraud loss</span>
+                  <span class="cost-value danger" id="opt-cost-fn">₹49,492</span>
+                </div>
+                <div class="cost-item total">
+                  <span>Total modeled loss</span>
+                  <span class="cost-value highlight" id="opt-cost-total">₹106,442</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="opt-card">
+              <h3>Operating Metrics</h3>
+              <div class="metrics-row">
+                <div class="mini-metric">
+                  <span class="m-label">Precision</span>
+                  <span class="m-val" id="opt-prec">0.213</span>
+                </div>
+                <div class="mini-metric">
+                  <span class="m-label">Recall</span>
+                  <span class="m-val" id="opt-rec">0.966</span>
+                </div>
+                <div class="mini-metric">
+                  <span class="m-label">False Positives</span>
+                  <span class="m-val" id="opt-fp">1,139</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── VIEW 8: AUDIT LOG ───────────────────────────────────────────── -->
+        <div id="view-audit" class="view-panel">
+          <div class="page-header">
+            <h1>Audit Log</h1>
+            <p>Every decision is traceable.</p>
+          </div>
+
+          <section class="panel-card">
+            <div class="table-container">
+              <table class="dense-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Transaction</th>
+                    <th>Model</th>
+                    <th>Risk</th>
+                    <th>Policy</th>
+                    <th>Decision</th>
+                    <th>Reason</th>
+                  </tr>
+                </thead>
+                <tbody id="audit-tbody">
+                  <tr><td colspan="7" class="text-center p-4">Loading audit logs...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <!-- ── VIEW 9: MODEL EVALUATION ────────────────────────────────────── -->
+        <div id="view-evaluation" class="view-panel">
+          <div class="page-header">
+            <h1>Model Evaluation</h1>
+            <p>Held-out chronological evaluation of the payment risk model.</p>
+          </div>
+
+          <!-- Top Metrics Bar -->
+          <div class="kpi-strip-tight" style="margin-bottom:16px;">
+            <div class="kpi-cell">
+              <span class="kpi-label">PR-AUC</span>
+              <span class="kpi-num highlight">0.888</span>
+              <span class="kpi-ctx">XGBoost Classifier</span>
+            </div>
+            <div class="kpi-cell">
+              <span class="kpi-label">RECALL</span>
+              <span class="kpi-num success">95.9%</span>
+              <span class="kpi-ctx">Captured 308 / 319</span>
+            </div>
+            <div class="kpi-cell">
+              <span class="kpi-label">FRAUD CASES</span>
+              <span class="kpi-num">319</span>
+              <span class="kpi-ctx">Test set ground truth</span>
+            </div>
+            <div class="kpi-cell">
+              <span class="kpi-label">DETECTED</span>
+              <span class="kpi-num success">306</span>
+              <span class="kpi-ctx">13 uncaptured</span>
+            </div>
+          </div>
+
+          <div class="optimizer-grid">
+            <div class="opt-card">
+              <h3>MODEL BENCHMARK</h3>
+              <p class="panel-sub" style="margin-bottom:12px;">Evaluated on chronological 80/20 hold-out test set</p>
+
+              <div class="comp-bar-group">
+                <div class="comp-row">
+                  <span>Logistic Regression Baseline</span>
+                  <span class="mono">PR-AUC 0.885</span>
+                </div>
+                <div class="comp-bar"><div class="comp-fill" style="width: 88.5%;"></div></div>
+              </div>
+              <div class="comp-bar-group" style="margin-top:12px;">
+                <div class="comp-row">
+                  <span>XGBoost Classifier (Selected Model)</span>
+                  <span class="mono">PR-AUC 0.888</span>
+                </div>
+                <div class="comp-bar"><div class="comp-fill xgb" style="width: 88.8%;"></div></div>
+              </div>
+
+              <div class="methodology-box" style="margin-top:16px;">
+                <h4>EVALUATION METHODOLOGY</h4>
+                <ul class="method-list">
+                  <li>50,000 synthetic transactions total</li>
+                  <li>35,000 training / 5,000 validation (threshold locking) / 10,000 test</li>
+                  <li>~3% fraud prevalence</li>
+                  <li>Tuned XGBoost Classifier with SHAP TreeExplainer</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="opt-card">
+              <h3>FINANCIAL COST</h3>
+              <div class="impact-table">
+                <div class="impact-row">
+                  <span>False-positive cost</span>
+                  <span class="mono warning">₹56,950</span>
+                </div>
+                <div class="impact-row">
+                  <span>False-negative cost</span>
+                  <span class="mono danger">₹49,492</span>
+                </div>
+                <div class="impact-row total">
+                  <span>Total modeled loss</span>
+                  <span class="mono highlight">₹106,442</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- ── DEFENSIVE FOOTER STATEMENT ─────────────────────────────────── -->
+      <footer class="app-footer">
+        <p>Defense-only system — RiskLedger does not initiate payments, move funds, or optimize merchant revenue. It provides defensive risk scoring, policy assessment and decision analysis.</p>
+      </footer>
+
+    </div>
+
+  </div>
+
+  <!-- ── TRANSACTION DETAIL DRAWER ───────────────────────────────────────── -->
+  <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+
+      <div class="modal-header">
+        <div>
+          <span id="modal-txn-id" class="modal-txn-id">pay_82931</span>
+          <h3 id="modal-amount-title" class="modal-title">₹48,500.00</h3>
+        </div>
+        <span id="modal-rec-badge" class="rec-badge block">VERIFY REQUIRED</span>
+      </div>
+
+      <div class="modal-score-strip">
+        <div class="m-strip-item">
+          <span>Risk probability</span>
+          <strong id="modal-score" class="mono text-danger">87.4%</strong>
+        </div>
+        <div class="m-strip-item">
+          <span>Operating threshold</span>
+          <strong id="modal-thresh" class="mono">14.0%</strong>
+        </div>
+        <div class="m-strip-item">
+          <span>Decision</span>
+          <strong id="modal-dec" class="mono">VERIFY</strong>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <h4>MODEL EXPLANATION</h4>
+        <p class="sub-text">Actual model-derived SHAP feature contributions:</p>
+
+        <div id="modal-shap-bars" class="shap-bars-container" style="margin-bottom:16px;"></div>
+
+        <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:14px;">
+          Base probability: <span id="modal-base-prob" class="mono">3.0%</span> → Model contributions → Final probability: <span id="modal-output-prob" class="mono">87.4%</span>
+        </div>
+
+        <div class="modal-cf-box">
+          <strong>Decision Boundary Analysis:</strong>
+          <p id="modal-cf-text" style="margin-top:4px;">At ₹27,300 → BLOCK → VERIFY</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
