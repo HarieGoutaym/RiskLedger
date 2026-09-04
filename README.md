@@ -54,7 +54,7 @@ RiskLedger uses a **3-Way Chronological Split** across 50,000 synthetic transact
 ## Execution Commands
 
 ```powershell
-cd D:\GitHub\payguard-ai
+cd (The repo folder)
 
 # Start Production Server:
 .\.venv\Scripts\python -m uvicorn backend.server:app --host 0.0.0.0 --port 8000 --reload
